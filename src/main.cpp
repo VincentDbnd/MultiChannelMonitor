@@ -1,5 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QThread>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -11,5 +13,6 @@ int main(int argc, char *argv[])
 
     engine.loadFromModule("MultiChannelMonitor", "Main");
 
+    qDebug() << "GUI thread:" << QThread::currentThread();
     return app.exec();
 }

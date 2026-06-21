@@ -4,7 +4,8 @@
 AcquisitionEngine::AcquisitionEngine(QObject *parent)
     : QObject(parent)
 {
-    // Create three channels
+    // Channels live on the GUI thread: parented to "this", their
+    // Q_PROPERTYs are read directly by QML bindings.
     m_channels.append(new MeasurementChannel(this));
     m_channels.append(new MeasurementChannel(this));
     m_channels.append(new MeasurementChannel(this));
@@ -13,9 +14,30 @@ AcquisitionEngine::AcquisitionEngine(QObject *parent)
     m_channels.at(1)->setLabel("Channel 2");
     m_channels.at(2)->setLabel("Channel 3");
 
-    // A single timer drives all channels
-    m_timer.setInterval(200);
-    connect(&m_timer, &QTimer::timeout, this, &AcquisitionEngine::sampleAllChannels);
+    // The worker must NOT have a parent before moveToThread: a parented
+    // QObject cannot be moved to another thread.
+    m_worker = new AcquisitionWorker(m_channels.size());
+    m_worker->moveToThread(&m_workerThread);
+
+    // Worker -> GUI: Qt automatically uses a queued connection here since
+    // sender and receiver live on different threads. No mutex needed.
+    connect(m_worker, &AcquisitionWorker::sampleReady,
+            this, &AcquisitionEngine::onSampleReady);
+
+    // GUI -> worker control signals, also auto-queued across threads.
+    connect(this, &AcquisitionEngine::requestStart, m_worker, &AcquisitionWorker::start);
+    connect(this, &AcquisitionEngine::requestStop, m_worker, &AcquisitionWorker::stop);
+
+    // Delete the worker once the thread's event loop actually stops.
+    connect(&m_workerThread, &QThread::finished, m_worker, &QObject::deleteLater);
+
+    m_workerThread.start();
+}
+
+AcquisitionEngine::~AcquisitionEngine()
+{
+    m_workerThread.quit();
+    m_workerThread.wait();
 }
 
 QQmlListProperty<MeasurementChannel> AcquisitionEngine::channels()
@@ -26,22 +48,24 @@ QQmlListProperty<MeasurementChannel> AcquisitionEngine::channels()
 
 bool AcquisitionEngine::isRunning() const
 {
-    return m_timer.isActive();
+    return m_running;
 }
 
 void AcquisitionEngine::start()
 {
-    if (m_timer.isActive())
+    if (m_running)
         return;
-    m_timer.start();
+    m_running = true;
+    emit requestStart();
     emit runningChanged();
 }
 
 void AcquisitionEngine::pause()
 {
-    if (!m_timer.isActive())
+    if (!m_running)
         return;
-    m_timer.stop();
+    m_running = false;
+    emit requestStop();
     emit runningChanged();
 }
 
@@ -52,10 +76,11 @@ void AcquisitionEngine::reset()
         channel->reset();
 }
 
-void AcquisitionEngine::sampleAllChannels()
+void AcquisitionEngine::onSampleReady(int channelIndex, double value)
 {
-    for (auto *channel : std::as_const(m_channels))
-        channel->randomize();
+    if (channelIndex < 0 || channelIndex >= m_channels.size())
+        return;
+    m_channels.at(channelIndex)->updateValue(value);
 }
 
 qsizetype AcquisitionEngine::channelCount(QQmlListProperty<MeasurementChannel> *list)

@@ -40,3 +40,12 @@ void MeasurementChannel::reset() {
     m_currentValue = 0.0;
     emit currentValueChanged();
 }
+
+void MeasurementChannel::updateValue(double value)
+{
+    if (m_currentValue == value)
+        return;
+
+    m_currentValue = value;
+    emit currentValueChanged();
+}

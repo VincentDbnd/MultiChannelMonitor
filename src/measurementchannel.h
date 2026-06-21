@@ -5,10 +5,6 @@
 #include <QtQml/qqmlregistration.h>
 
 // Represents a single measurement source exposed to QML.
-// Currently generates values synchronously on the GUI thread (randomize()).
-// TODO: move value generation to a dedicated QThread worker once we
-// introduce periodic/automatic sampling, to keep acquisition decoupled
-// from the UI thread.
 class MeasurementChannel : public QObject {
     Q_OBJECT
     QML_ELEMENT
@@ -28,7 +24,12 @@ public:
 
     // Callable from QML; generates a new random value and notifies listeners
     Q_INVOKABLE void randomize();
+
     Q_INVOKABLE void reset();
+
+    // Called by AcquisitionEngine on the GUI thread.
+    // Safe to call directly here — never call from the worker thread.
+    void updateValue(double value);
 
 signals:
     void labelChanged();
