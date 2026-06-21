@@ -31,3 +31,12 @@ void MeasurementChannel::randomize()
     m_currentValue = QRandomGenerator::global()->generateDouble() * 100.0;
     emit currentValueChanged();
 }
+
+void MeasurementChannel::reset() {
+    // Avoid emitting a signal if the value is already at its default
+    if (m_currentValue == 0.0)
+        return;
+
+    m_currentValue = 0.0;
+    emit currentValueChanged();
+}

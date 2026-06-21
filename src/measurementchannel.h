@@ -9,8 +9,7 @@
 // TODO: move value generation to a dedicated QThread worker once we
 // introduce periodic/automatic sampling, to keep acquisition decoupled
 // from the UI thread.
-class MeasurementChannel : public QObject
-{
+class MeasurementChannel : public QObject {
     Q_OBJECT
     QML_ELEMENT
 
@@ -22,15 +21,18 @@ public:
     explicit MeasurementChannel(QObject *parent = nullptr);
 
     QString label() const;
+
     void setLabel(const QString &label);
 
     double currentValue() const;
 
     // Callable from QML; generates a new random value and notifies listeners
     Q_INVOKABLE void randomize();
+    Q_INVOKABLE void reset();
 
-    signals:
-        void labelChanged();
+signals:
+    void labelChanged();
+
     void currentValueChanged();
 
 private:

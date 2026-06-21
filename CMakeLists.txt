@@ -12,6 +12,8 @@ qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(MultiChannelMonitor
         src/main.cpp
+        src/acquisitionengine.cpp
+        src/acquisitionengine.h
 )
 
 target_include_directories(MultiChannelMonitor PRIVATE src)
@@ -29,6 +31,8 @@ qt_add_qml_module(MultiChannelMonitor
         SOURCES
         src/measurementchannel.h
         src/measurementchannel.cpp
+        src/acquisitionengine.h
+        src/acquisitionengine.cpp
 )
 
 target_link_libraries(MultiChannelMonitor PRIVATE
