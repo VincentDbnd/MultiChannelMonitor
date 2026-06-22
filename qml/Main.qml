@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Window
-import QtQuick.Controls
+import QtQuick.Layouts
+
 import MultiChannelMonitor
 
 Window {
-    width: 760
-    height: 480
+    width: 1600
+    height: 900
     visible: true
     title: qsTr("Multi Channel Monitor")
 
@@ -17,61 +18,42 @@ Window {
         anchors.fill: parent
         color: "#1e1e2e"
 
+        GridLayout {
+
+        }
         Column {
             anchors.fill: parent
             anchors.margins: 24
-            spacing: 24
+            spacing: 16
 
-            Row {
-                spacing: 12
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                Button {
-                    text: engine.running ? "Pause" : "Start"
-                    onClicked: engine.running ? engine.pause() : engine.start()
-                }
-
-                Button {
-                    text: "Reset"
-                    onClicked: engine.reset()
+            ControlBar {
+                running: engine.running
+                onStartRequested: engine.start()
+                onPauseRequested: engine.pause()
+                onResetRequested: {
+                    engine.reset()
+                    chart.clear()
                 }
             }
 
             Row {
                 spacing: 24
-                anchors.horizontalCenter: parent.horizontalCenter
 
-                // One delegate instantiated per channel exposed by the engine
                 Repeater {
                     model: engine.channels
-
-                    delegate: Rectangle {
-                        width: 180
-                        height: 140
-                        radius: 8
-                        color: "#27293d"
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 8
-
-                            Text {
-                                text: modelData.label
-                                color: "white"
-                                font.pixelSize: 18
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-
-                            Text {
-                                text: modelData.currentValue.toFixed(2)
-                                color: "#7dd3fc"
-                                font.pixelSize: 32
-                                font.bold: true
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                        }
+                    delegate: ChannelCard {
+                        required property MeasurementChannel modelData
+                        channel: modelData
                     }
                 }
+            }
+
+            MultiChannelChart {
+                id: chart
+                width: parent.width
+                height: 320
+                visibleSamples: 40
+                channels: engine.channels
             }
         }
     }

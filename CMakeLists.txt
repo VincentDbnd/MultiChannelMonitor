@@ -5,7 +5,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Graphs)
 
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
@@ -26,6 +26,9 @@ qt_add_qml_module(MultiChannelMonitor
         VERSION 1.0
         QML_FILES
         qml/Main.qml
+        qml/ChannelCard.qml
+        qml/ControlBar.qml
+        qml/MultiChannelChart.qml
         SOURCES
         src/measurementchannel.h
         src/measurementchannel.cpp
@@ -41,4 +44,5 @@ target_link_libraries(MultiChannelMonitor PRIVATE
         Qt6::Qml
         Qt6::Quick
         Qt6::QuickControls2
+        Qt6::Graphs
 )
