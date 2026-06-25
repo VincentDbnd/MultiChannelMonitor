@@ -10,8 +10,8 @@ class MeasurementChannel : public QObject {
     QML_ELEMENT
 
     Q_PROPERTY(QString label READ label WRITE setLabel NOTIFY labelChanged)
-
     Q_PROPERTY(double currentValue READ currentValue NOTIFY currentValueChanged)
+    Q_PROPERTY(double threshold READ threshold NOTIFY thresholdChanged)
 
 public:
     explicit MeasurementChannel(QObject *parent = nullptr);
@@ -21,6 +21,10 @@ public:
     void setLabel(const QString &label);
 
     double currentValue() const;
+
+    double threshold() const;
+
+    void setThreshold(const double &threshold);
 
     // Callable from QML; generates a new random value and notifies listeners
     Q_INVOKABLE void randomize();
@@ -33,10 +37,11 @@ public:
 
 signals:
     void labelChanged();
-
     void currentValueChanged();
+    void thresholdChanged();
 
 private:
     QString m_label;
     double m_currentValue = 0.0;
+    double m_threshold = 90.0;
 };

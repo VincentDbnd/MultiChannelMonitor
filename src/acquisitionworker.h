@@ -3,8 +3,7 @@
 #include <QObject>
 #include <QTimer>
 
-// Runs on a dedicated QThread, decoupled from the GUI thread.
-// Never touches QML or GUI objects directly.
+// Generates simulated samples on a background thread and emits them per channel.
 class AcquisitionWorker : public QObject {
     Q_OBJECT
 

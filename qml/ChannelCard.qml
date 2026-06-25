@@ -1,6 +1,7 @@
 import QtQuick
 import MultiChannelMonitor
 
+// Displays the label and live value for a single measurement channel.
 Rectangle {
     id: root
 
@@ -9,8 +10,8 @@ Rectangle {
 
     width: 180
     height: 100
-    radius: 8
-    color: "#27293d"
+    radius: 4
+    color: Style.surface
 
     Column {
         anchors.centerIn: parent
@@ -30,5 +31,6 @@ Rectangle {
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
         }
+        
     }
 }

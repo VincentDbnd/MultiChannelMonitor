@@ -2,6 +2,7 @@ import QtQuick
 import QtGraphs
 import MultiChannelMonitor
 
+// Scrolling line graph that plots live samples for every channel.
 Item {
     id: root
 
@@ -15,7 +16,7 @@ Item {
 
         theme: GraphsTheme {
             colorScheme: GraphsTheme.ColorScheme.Dark
-            backgroundColor: "#27293d"
+            backgroundColor: Style.surface
         }
 
         // Explicit property bindings: axes bypass defaultProperty (seriesList)

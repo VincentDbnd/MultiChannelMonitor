@@ -8,17 +8,15 @@
 
 #include "measurementchannel.h"
 #include "acquisitionworker.h"
+#include "NotificationsModel.h"
 
-// Owns a fixed collection of MeasurementChannel instances (GUI thread) and
-// an AcquisitionWorker running on a dedicated QThread that generates
-// simulated samples. Samples cross from the worker thread to the GUI
-// thread via a queued signal/slot connection, with no manual locking.
-class AcquisitionEngine : public QObject
-{
+// Owns the channels (GUI thread) and drives the AcquisitionWorker on a background thread.
+class AcquisitionEngine : public QObject {
     Q_OBJECT
     QML_ELEMENT
 
     Q_PROPERTY(QQmlListProperty<MeasurementChannel> channels READ channels CONSTANT)
+    Q_PROPERTY(NotificationsModel* notifications READ notifications CONSTANT)
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
 
 public:
@@ -26,28 +24,29 @@ public:
     ~AcquisitionEngine() override;
 
     QQmlListProperty<MeasurementChannel> channels();
+    NotificationsModel *notifications() const;
     bool isRunning() const;
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void pause();
     Q_INVOKABLE void reset();
 
-    signals:
-        void runningChanged();
-
-    // Internal control signals sent to the worker thread (auto-queued)
+signals:
+    void runningChanged();
     void requestStart();
     void requestStop();
 
 private slots:
-    // Invoked on the GUI thread whenever the worker emits a new sample
     void onSampleReady(int channelIndex, double value);
 
 private:
+    void verifySample(int channelIndex, double value);
+
     static qsizetype channelCount(QQmlListProperty<MeasurementChannel> *list);
     static MeasurementChannel *channelAt(QQmlListProperty<MeasurementChannel> *list, qsizetype index);
 
     QList<MeasurementChannel *> m_channels;
+    NotificationsModel *m_notifications = nullptr;
     QThread m_workerThread;
     AcquisitionWorker *m_worker = nullptr;
     bool m_running = false;

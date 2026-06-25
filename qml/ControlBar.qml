@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
+// Start / Pause / Reset controls; emits signals upward rather than acting directly.
 Row {
     id: root
     spacing: 12

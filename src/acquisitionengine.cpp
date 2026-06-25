@@ -3,6 +3,8 @@
 
 AcquisitionEngine::AcquisitionEngine(QObject *parent)
     : QObject(parent) {
+    m_notifications = new NotificationsModel(this);
+
     // Channels live on the GUI thread
     m_channels.append(new MeasurementChannel(this));
     m_channels.append(new MeasurementChannel(this));
@@ -34,7 +36,12 @@ AcquisitionEngine::~AcquisitionEngine() {
 
 QQmlListProperty<MeasurementChannel> AcquisitionEngine::channels() {
     return QQmlListProperty<MeasurementChannel>(this, &m_channels,
-                                                &AcquisitionEngine::channelCount, &AcquisitionEngine::channelAt);
+                                                &AcquisitionEngine::channelCount,
+                                                &AcquisitionEngine::channelAt);
+}
+
+NotificationsModel *AcquisitionEngine::notifications() const {
+    return m_notifications;
 }
 
 bool AcquisitionEngine::isRunning() const {
@@ -61,12 +68,26 @@ void AcquisitionEngine::reset() {
     pause();
     for (auto *channel: std::as_const(m_channels))
         channel->reset();
+    m_notifications->clear();
 }
 
 void AcquisitionEngine::onSampleReady(int channelIndex, double value) {
     if (channelIndex < 0 || channelIndex >= m_channels.size())
         return;
     m_channels.at(channelIndex)->updateValue(value);
+    verifySample(channelIndex, value);
+}
+
+void AcquisitionEngine::verifySample(int channelIndex, double value) {
+    MeasurementChannel *channel = m_channels.at(channelIndex);
+    if (value > channel->threshold()) {
+        m_notifications->addNotification(
+            "Threshold exceeded",
+            QString("Value %1 exceeds threshold %2").arg(value).arg(channel->threshold()),
+            channel->label(),
+            NotificationsModel::Warning
+        );
+    }
 }
 
 qsizetype AcquisitionEngine::channelCount(QQmlListProperty<MeasurementChannel> *list) {

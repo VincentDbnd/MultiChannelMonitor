@@ -21,14 +21,18 @@ set_target_properties(MultiChannelMonitor PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
 
+set_source_files_properties(qml/Style.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 qt_add_qml_module(MultiChannelMonitor
         URI MultiChannelMonitor
         VERSION 1.0
         QML_FILES
+        qml/Style.qml
         qml/Main.qml
         qml/ChannelCard.qml
         qml/ControlBar.qml
         qml/MultiChannelChart.qml
+        qml/Notification.qml
         SOURCES
         src/measurementchannel.h
         src/measurementchannel.cpp
@@ -36,6 +40,8 @@ qt_add_qml_module(MultiChannelMonitor
         src/acquisitionengine.cpp
         src/acquisitionworker.cpp
         src/acquisitionworker.h
+        src/NotificationsModel.cpp
+        src/NotificationsModel.h
 )
 
 target_link_libraries(MultiChannelMonitor PRIVATE

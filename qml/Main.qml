@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 import MultiChannelMonitor
 
+// Root window: wires AcquisitionEngine to ControlBar, ChannelCards and MultiChannelChart.
 Window {
     width: 1600
     height: 900
@@ -16,45 +17,71 @@ Window {
 
     Rectangle {
         anchors.fill: parent
-        color: "#1e1e2e"
+        color: Style.background
 
-        GridLayout {
-
+        ControlBar {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            running: engine.running
+            onStartRequested: engine.start()
+            onPauseRequested: engine.pause()
+            onResetRequested: {
+                engine.reset()
+                chart.clear()
+            }
         }
-        Column {
+
+        RowLayout {
             anchors.fill: parent
-            anchors.margins: 24
+
             spacing: 16
 
-            ControlBar {
-                running: engine.running
-                onStartRequested: engine.start()
-                onPauseRequested: engine.pause()
-                onResetRequested: {
-                    engine.reset()
-                    chart.clear()
+            Column {
+                spacing: 16
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                Row {
+                    spacing: 24
+
+                    Repeater {
+                        model: engine.channels
+                        delegate: ChannelCard {
+                            required property MeasurementChannel modelData
+                            channel: modelData
+                        }
+                    }
+                }
+
+                MultiChannelChart {
+                    id: chart
+                    width: parent.width
+                    height: 320
+                    visibleSamples: 40
+                    channels: engine.channels
                 }
             }
 
-            Row {
-                spacing: 24
+            Column {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-                Repeater {
-                    model: engine.channels
-                    delegate: ChannelCard {
-                        required property MeasurementChannel modelData
-                        channel: modelData
+                Rectangle {
+                    width: 300
+                    height: parent.height
+                    radius: 4
+                    color: Style.surface
+
+                    ListView {
+                        anchors.fill: parent
+                        model: engine.notifications
+                        spacing: 8
+
+                        delegate: Notification {}
                     }
                 }
             }
-
-            MultiChannelChart {
-                id: chart
-                width: parent.width
-                height: 320
-                visibleSamples: 40
-                channels: engine.channels
-            }
         }
+
     }
 }

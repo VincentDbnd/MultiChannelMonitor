@@ -2,17 +2,14 @@
 #include <QRandomGenerator>
 
 MeasurementChannel::MeasurementChannel(QObject *parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
 }
 
-QString MeasurementChannel::label() const
-{
+QString MeasurementChannel::label() const {
     return m_label;
 }
 
-void MeasurementChannel::setLabel(const QString &label)
-{
+void MeasurementChannel::setLabel(const QString &label) {
     // Avoid emitting a change signal if the value didn't actually change
     if (m_label == label)
         return;
@@ -21,13 +18,11 @@ void MeasurementChannel::setLabel(const QString &label)
     emit labelChanged();
 }
 
-double MeasurementChannel::currentValue() const
-{
+double MeasurementChannel::currentValue() const {
     return m_currentValue;
 }
 
-void MeasurementChannel::randomize()
-{
+void MeasurementChannel::randomize() {
     m_currentValue = QRandomGenerator::global()->generateDouble() * 100.0;
     emit currentValueChanged();
 }
@@ -41,11 +36,20 @@ void MeasurementChannel::reset() {
     emit currentValueChanged();
 }
 
-void MeasurementChannel::updateValue(double value)
-{
+void MeasurementChannel::updateValue(double value) {
     if (m_currentValue == value)
         return;
 
     m_currentValue = value;
     emit currentValueChanged();
+}
+
+double MeasurementChannel::threshold() const {
+    return m_threshold;
+}
+
+void MeasurementChannel::setThreshold(const double &threshold) {
+    if (m_threshold == threshold)
+        return;
+    m_threshold = threshold;
 }
