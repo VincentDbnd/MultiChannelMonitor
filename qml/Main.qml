@@ -15,34 +15,34 @@ Window {
         id: engine
     }
 
+    Text {
+        text : "MultiChannelMonitor @VincentDbnd"
+        anchors.bottom : parent.bottom
+        anchors.left : parent.left
+        anchors.margins : 5
+        color: GlobalStyle.textSecondary
+        font.pixelSize: 16
+        z : 10
+    }
+
     Rectangle {
         anchors.fill: parent
-        color: Style.background
+        color: GlobalStyle.background
 
-        ControlBar {
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            running: engine.running
-            onStartRequested: engine.start()
-            onPauseRequested: engine.pause()
-            onResetRequested: {
-                engine.reset()
-                chart.clear()
-            }
-        }
 
         RowLayout {
+            id: mainRow
             anchors.fill: parent
+            anchors.margins: 15
 
-            spacing: 16
+            spacing: 15
 
-            Column {
-                spacing: 16
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+            ColumnLayout {
+                Layout.preferredWidth: mainRow.width * 4 / 5
+                spacing: 15
 
-                Row {
-                    spacing: 24
+                RowLayout {
+                    spacing: 15
 
                     Repeater {
                         model: engine.channels
@@ -51,37 +51,61 @@ Window {
                             channel: modelData
                         }
                     }
+
+                    ThresholdEditor {
+                        Layout.fillWidth: true
+                        warningThreshold: engine.warningThreshold
+                        dangerThreshold: engine.dangerThreshold
+                        onWarningThresholdChanged: engine.warningThreshold = warningThreshold
+                        onDangerThresholdChanged: engine.dangerThreshold = dangerThreshold
+                    }
                 }
 
                 MultiChannelChart {
                     id: chart
-                    width: parent.width
-                    height: 320
+                    Layout.fillWidth: true; Layout.preferredHeight: mainRow.height * 2 / 3
                     visibleSamples: 40
                     channels: engine.channels
                 }
+
+                ControlBar {
+                    running: engine.running
+                    onStartRequested: engine.start()
+                    onPauseRequested: engine.pause()
+                    onResetRequested: {
+                        engine.reset()
+                        chart.clear()
+                    }
+                }
+
+                Item {
+                    Layout.fillHeight: true
+                }
+
             }
 
-            Column {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+            ColumnLayout {
+                Layout.preferredWidth: mainRow.width * 1 / 5
 
                 Rectangle {
-                    width: 300
-                    height: parent.height
-                    radius: 4
-                    color: Style.surface
+                    color: GlobalStyle.surface
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    radius: GlobalStyle.radius
 
                     ListView {
                         anchors.fill: parent
+                        anchors.margins: 10
                         model: engine.notifications
                         spacing: 8
 
-                        delegate: Notification {}
+                        delegate: Notification {
+                        }
                     }
+
                 }
             }
-        }
 
+        }
     }
 }

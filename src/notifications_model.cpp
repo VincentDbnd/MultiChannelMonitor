@@ -1,4 +1,4 @@
-#include "NotificationsModel.h"
+#include "notifications_model.h"
 
 NotificationsModel::NotificationsModel(QObject *parent)
     : QAbstractListModel(parent) {

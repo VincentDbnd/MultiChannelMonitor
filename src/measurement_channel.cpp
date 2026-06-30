@@ -1,12 +1,21 @@
-#include "measurementchannel.h"
+#include "measurement_channel.h"
 #include <QRandomGenerator>
+
+#include "acquisition_engine.h"
+
 
 MeasurementChannel::MeasurementChannel(QObject *parent)
     : QObject(parent) {
+    m_index = AcquisitionEngine::indexCounter;
+    AcquisitionEngine::indexCounter++;
 }
 
 QString MeasurementChannel::label() const {
     return m_label;
+}
+
+int MeasurementChannel::index() const {
+    return m_index;
 }
 
 void MeasurementChannel::setLabel(const QString &label) {
@@ -37,6 +46,7 @@ void MeasurementChannel::reset() {
 }
 
 void MeasurementChannel::updateValue(double value) {
+
     if (m_currentValue == value)
         return;
 
@@ -44,12 +54,3 @@ void MeasurementChannel::updateValue(double value) {
     emit currentValueChanged();
 }
 
-double MeasurementChannel::threshold() const {
-    return m_threshold;
-}
-
-void MeasurementChannel::setThreshold(const double &threshold) {
-    if (m_threshold == threshold)
-        return;
-    m_threshold = threshold;
-}

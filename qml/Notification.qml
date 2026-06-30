@@ -9,12 +9,12 @@ Rectangle {
     required property string channel
     required property int severity
 
-    width: 260
-    height: 70
-    radius: 4
-    border.width : 2
-    border.color : "#fbbf24"
-    color: root.severity === NotificationsModel.Danger ? "#4c1d1d" : "#2d2d1d"
+    width: parent ? parent.width : 0
+    height: 50
+    radius: GlobalStyle.radius
+    border.width: 2
+    border.color: root.severity === NotificationsModel.Danger ? GlobalStyle.danger : GlobalStyle.warning
+    color: root.severity === NotificationsModel.Danger ? Qt.rgba(GlobalStyle.danger.r, GlobalStyle.danger.g, GlobalStyle.danger.b, 0.15) : Qt.rgba(GlobalStyle.warning.r, GlobalStyle.warning.g, GlobalStyle.warning.b, 0.15)
 
     opacity: 0
     transform: Translate {
@@ -47,14 +47,14 @@ Rectangle {
 
         Text {
             text: root.channel + " – " + root.label
-            color: root.severity === NotificationsModel.Danger ? "#f87171" : "#fbbf24"
+            color: root.severity === NotificationsModel.Danger ? GlobalStyle.danger : GlobalStyle.warning
             font.pixelSize: 13
             font.bold: true
         }
 
         Text {
             text: root.core
-            color: "#d1d5db"
+            color: GlobalStyle.textPrimary
             font.pixelSize: 11
         }
     }

@@ -1,4 +1,4 @@
-#include "acquisitionworker.h"
+#include "acquisition_worker.h"
 #include <QRandomGenerator>
 #include <QThread>
 #include <QDebug>

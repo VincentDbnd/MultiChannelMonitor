@@ -1,5 +1,7 @@
-#include "acquisitionengine.h"
+#include "acquisition_engine.h"
 #include <utility>
+
+int AcquisitionEngine::indexCounter = 0;
 
 AcquisitionEngine::AcquisitionEngine(QObject *parent)
     : QObject(parent) {
@@ -80,14 +82,37 @@ void AcquisitionEngine::onSampleReady(int channelIndex, double value) {
 
 void AcquisitionEngine::verifySample(int channelIndex, double value) {
     MeasurementChannel *channel = m_channels.at(channelIndex);
-    if (value > channel->threshold()) {
+    if (value > m_dangerThreshold) {
         m_notifications->addNotification(
-            "Threshold exceeded",
-            QString("Value %1 exceeds threshold %2").arg(value).arg(channel->threshold()),
+            "DANGER",
+            QString("Value %1 exceeds %2 threshold.").arg(value).arg(m_dangerThreshold),
+            channel->label(),
+            NotificationsModel::Danger
+        );
+    } else if (value > m_warningThreshold) {
+        m_notifications->addNotification(
+            "WARNING",
+            QString("Value %1 exceeds %2 threshold.").arg(value).arg(m_warningThreshold),
             channel->label(),
             NotificationsModel::Warning
         );
     }
+}
+
+double AcquisitionEngine::warningThreshold() const { return m_warningThreshold; }
+
+void AcquisitionEngine::setWarningThreshold(double threshold) {
+    if (m_warningThreshold == threshold) return;
+    m_warningThreshold = threshold;
+    emit warningThresholdChanged();
+}
+
+double AcquisitionEngine::dangerThreshold() const { return m_dangerThreshold; }
+
+void AcquisitionEngine::setDangerThreshold(double threshold) {
+    if (m_dangerThreshold == threshold) return;
+    m_dangerThreshold = threshold;
+    emit dangerThresholdChanged();
 }
 
 qsizetype AcquisitionEngine::channelCount(QQmlListProperty<MeasurementChannel> *list) {

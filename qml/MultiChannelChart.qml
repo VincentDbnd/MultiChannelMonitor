@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtGraphs
 import MultiChannelMonitor
 
@@ -8,29 +9,68 @@ Item {
 
     required property var channels
     property int visibleSamples: 40
+    property int totalSamples: 0
+    property bool liveMode: true
 
-    GraphsView {
-        id: graphsView
-        anchors.fill: parent
-        antialiasing: true
+    function updateAxisX(start) {
+        axisX.min = start
+        axisX.max = start + visibleSamples
+    }
 
-        theme: GraphsTheme {
-            colorScheme: GraphsTheme.ColorScheme.Dark
-            backgroundColor: Style.surface
+    Rectangle {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            bottom: hScrollBar.top
         }
+        radius: GlobalStyle.radius
+        layer.enabled: true
+        color: "transparent"
 
-        // Explicit property bindings: axes bypass defaultProperty (seriesList)
-        // and register with the view's axis renderer.
-        axisX: ValueAxis {
-            id: axisX
-            min: 0
-            max: root.visibleSamples
+        GraphsView {
+            id: graphsView
+            anchors.fill: parent
+            antialiasing: true
+
+            theme: GraphsTheme {
+                plotAreaBackgroundColor: Qt.darker(GlobalStyle.surface, 1.4)
+                backgroundColor: GlobalStyle.surface
+                grid.mainColor: GlobalStyle.surface
+            }
+
+            axisX: ValueAxis {
+                id: axisX
+                min: 0
+                max: root.visibleSamples
+                tickInterval: 100000
+            }
+
+            axisY: ValueAxis {
+                id: axisY
+                min: 0
+                max: 100
+                tickInterval: 20
+                tickAnchor: 0
+            }
         }
+    }
 
-        axisY: ValueAxis {
-            id: axisY
-            min: 0
-            max: 100
+    ScrollBar {
+        id: hScrollBar
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+        orientation: Qt.Horizontal
+        size: root.totalSamples > root.visibleSamples ? root.visibleSamples / root.totalSamples : 1.0
+
+        onPositionChanged: {
+            if (!pressed) return
+            root.liveMode = (position + size >= 1.0)
+            const maxStart = root.totalSamples - root.visibleSamples
+            root.updateAxisX(Math.round(position / (1.0 - size) * maxStart))
         }
     }
 
@@ -43,18 +83,23 @@ Item {
             required property int index
 
             name: modelData.label
+            color: GlobalStyle.channelColors[index] ?? GlobalStyle.accent
 
             property int sampleIdx: 0
 
             Component.onCompleted: {
                 const ch = modelData
                 const isFirst = (index === 0)
-                ch.currentValueChanged.connect(function() {
+                ch.currentValueChanged.connect(function () {
                     append(sampleIdx, ch.currentValue)
                     sampleIdx++
-                    if (isFirst && sampleIdx > root.visibleSamples) {
-                        axisX.min = sampleIdx - root.visibleSamples
-                        axisX.max = sampleIdx
+                    if (isFirst) {
+                        root.totalSamples = sampleIdx
+                        if (root.liveMode && sampleIdx > root.visibleSamples) {
+                            const liveStart = sampleIdx - root.visibleSamples
+                            root.updateAxisX(liveStart)
+                            hScrollBar.position = liveStart / sampleIdx
+                        }
                     }
                 })
             }
@@ -70,7 +115,9 @@ Item {
             s.clear()
             s.sampleIdx = 0
         }
-        axisX.min = 0
-        axisX.max = root.visibleSamples
+        totalSamples = 0
+        liveMode = true
+        updateAxisX(0)
+        hScrollBar.position = 0
     }
 }

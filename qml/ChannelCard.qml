@@ -5,13 +5,12 @@ import MultiChannelMonitor
 Rectangle {
     id: root
 
-    // Public API of this component — like a typed React prop
     required property MeasurementChannel channel
 
     width: 180
     height: 100
-    radius: 4
-    color: Style.surface
+    radius: GlobalStyle.radius
+    color: GlobalStyle.surface
 
     Column {
         anchors.centerIn: parent
@@ -19,18 +18,18 @@ Rectangle {
 
         Text {
             text: root.channel.label
-            color: "white"
+            color: GlobalStyle.textSecondary
             font.pixelSize: 16
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Text {
             text: root.channel.currentValue.toFixed(2)
-            color: "#7dd3fc"
+            color: GlobalStyle.channelColors[root.channel.index] ?? GlobalStyle.accent
             font.pixelSize: 24
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
         }
-        
+
     }
 }
