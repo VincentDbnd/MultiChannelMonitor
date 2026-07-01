@@ -46,10 +46,10 @@ void MeasurementChannel::reset() {
 }
 
 void MeasurementChannel::updateValue(double value) {
-
-    if (m_currentValue == value)
-        return;
-
+    // Always emit, even if the value is unchanged: this is called once per
+    // acquisition tick, and the chart uses this signal to know a new sample
+    // arrived. Skipping it on a repeated value (e.g. clamped at 0 or 100)
+    // would make this channel's series fall behind the others.
     m_currentValue = value;
     emit currentValueChanged();
 }

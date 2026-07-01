@@ -55,6 +55,8 @@ signals:
 
     void requestStop();
 
+    void requestReset();
+
 private slots:
     void onSampleReady(int channelIndex, double value);
 

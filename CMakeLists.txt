@@ -54,3 +54,6 @@ target_link_libraries(MultiChannelMonitor PRIVATE
         Qt6::QuickControls2
         Qt6::Graphs
 )
+
+enable_testing()
+add_subdirectory(tests)

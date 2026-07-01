@@ -4,7 +4,6 @@ import QtQuick.Layouts
 
 import MultiChannelMonitor
 
-// Root window: wires AcquisitionEngine to ControlBar, ChannelCards and MultiChannelChart.
 Window {
     width: 1600
     height: 900
@@ -96,6 +95,7 @@ Window {
                     ListView {
                         anchors.fill: parent
                         anchors.margins: 10
+                        clip: true
                         model: engine.notifications
                         spacing: 8
 
