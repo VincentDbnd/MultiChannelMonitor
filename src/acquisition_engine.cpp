@@ -24,6 +24,7 @@ AcquisitionEngine::AcquisitionEngine(QObject *parent)
             this, &AcquisitionEngine::onSampleReady);
     connect(this, &AcquisitionEngine::requestStart, m_worker, &AcquisitionWorker::start);
     connect(this, &AcquisitionEngine::requestStop, m_worker, &AcquisitionWorker::stop);
+    connect(this, &AcquisitionEngine::requestReset, m_worker, &AcquisitionWorker::reset);
 
     // Delete the worker once the thread's event loop actually stops.
     connect(&m_workerThread, &QThread::finished, m_worker, &QObject::deleteLater);
@@ -68,6 +69,7 @@ void AcquisitionEngine::pause() {
 
 void AcquisitionEngine::reset() {
     pause();
+    emit requestReset();
     for (auto *channel: std::as_const(m_channels))
         channel->reset();
     m_notifications->clear();
